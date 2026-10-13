@@ -34,4 +34,4 @@ sends the same swipes as the arrows, so they can't be told apart.
 
 ## macOS note
 Open the device exclusively (seize it) or macOS also acts on the events
-(volume changes, fake clicks). hidapi ≥ 0.12 does this by default.
+(volume changes, fake clicks). the `hid` package (hidapi ≥ 0.12) does this by default.

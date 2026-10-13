@@ -19,7 +19,7 @@ Paste this into Claude Code, Codex or similar:
 ```text
 Set up the JX-11 Bluetooth scroll ring using https://github.com/oscarmorrison/jx11-ring
 
-1. Clone the repo and run `pip install hidapi` (use a venv).
+1. Clone the repo and run `pip install hid` (use a venv; needs `brew install hidapi`).
 2. Read PROTOCOL.md, then run `python examples/dump.py` and ask me to press each button and turn the wheel, to confirm my unit matches (VID 0x05AC, PID 0x0220). If it doesn't, tell me what you see.
 3. Run `python examples/events.py` and confirm scroll, centre, left, right and double-press events fire.
 4. Then wire the ring into my project: import `Ring` from jx11, register handlers with `ring.on(...)`, and call `ring.start()`. Ask me what each button should do.
@@ -28,7 +28,7 @@ Set up the JX-11 Bluetooth scroll ring using https://github.com/oscarmorrison/jx
 ## Use
 
 ```sh
-pip install hidapi
+brew install hidapi && pip install hid
 python examples/events.py     # high-level events
 python examples/dump.py       # raw reports
 ```
@@ -43,6 +43,7 @@ ring.start()
 ```
 
 ## Status
+- The ring is opened exclusively on macOS: quit any other app using it first, or you'll get "exclusive access and device already open".
 - Tested on macOS with one unit. Linux/Windows untested.
 - Put the ring in **pulley** mode first (hold ◀ + ▶ for 3 s to cycle modes).
 - Other units may use a different VID/PID. Run `examples/dump.py` and open an issue with what you see.
