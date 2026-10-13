@@ -1,0 +1,11 @@
+[project]
+name = "jx11-ring"
+version = "0.1.0"
+description = "Driver and protocol notes for the JX-11 Bluetooth scroll ring (sold as Plyisty Scrolling Ring)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = ["hidapi"]
+
+[tool.setuptools]
+py-modules = ["jx11"]
