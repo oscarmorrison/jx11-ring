@@ -10,6 +10,9 @@ turns raw HID reports into clean events: `scroll`, `centre`, `centre_double`,
 
 See [PROTOCOL.md](PROTOCOL.md) for the report formats.
 
+## Get one
+[Buy the ring on Amazon](https://link.amazon/B0fpmzGvn) (**affiliate link**: I earn a small commission at no extra cost to you).
+
 ## Use
 
 ```sh
