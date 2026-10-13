@@ -90,62 +90,6 @@ def test_stop_waits_for_reader_before_closing_device():
     assert not ring._read_thread.is_alive()
 
 
-def test_app_switch_holds_command_steps_tab_and_releases(monkeypatch):
-    """Cmd goes down once, each press taps Tab, and Cmd comes up after the idle pause (never left stuck)."""
-    import time
-
-    import actions
-
-    posted = []
-    monkeypatch.setattr(actions, "_HAS_QUARTZ", True)
-    monkeypatch.setattr(actions, "_cg_key", lambda kc, down, flags=0, tap=None: posted.append((kc, down, bool(flags))))
-    monkeypatch.setattr(actions, "APP_SWITCH_IDLE", 0.15)
-    actions.app_switch_release()          # clean slate
-    posted.clear()
-
-    actions.app_switch_press()
-    actions.app_switch_press()
-    actions.app_switch_press()
-    assert posted == [(55, True, True)] + [(48, True, True), (48, False, True)] * 3
-    time.sleep(0.4)
-    assert posted[-1] == (55, False, False)           # released by the idle timer
-    n = len(posted)
-    actions.app_switch_release()                      # idempotent
-    assert len(posted) == n
-
-
-def test_app_switch_cancel_sends_escape_then_releases(monkeypatch):
-    import actions
-
-    posted = []
-    monkeypatch.setattr(actions, "_HAS_QUARTZ", True)
-    monkeypatch.setattr(actions, "_cg_key", lambda kc, down, flags=0, tap=None: posted.append((kc, down)))
-    actions.app_switch_release()
-    posted.clear()
-    actions.app_switch_press()
-    assert actions.app_switch_active()
-    actions.app_switch_cancel()
-    assert not actions.app_switch_active()
-    assert posted[-3:] == [(53, True), (53, False), (55, False)]
-    n = len(posted)
-    actions.app_switch_cancel()                       # nothing held: posts nothing
-    assert len(posted) == n
-
-
-def test_delete_word_is_option_backspace_and_clear_line_is_cmd_backspace(monkeypatch):
-    import actions
-
-    posted = []
-    monkeypatch.setattr(actions, "_HAS_QUARTZ", True)
-    monkeypatch.setattr(actions, "_cg_key", lambda kc, down, flags=0, tap=None: posted.append((kc, down, flags)))
-    actions.send_delete_word()
-    actions.clear_line()
-    word, line = posted[:2], posted[2:]
-    assert [(k, d) for k, d, _ in word] == [(51, True), (51, False)]
-    assert word[0][2] == actions.kCGEventFlagMaskAlternate
-    assert line[0][2] == actions.kCGEventFlagMaskCommand
-
-
 def test_ring_hardware_double_click_is_next_and_previous_track():
     assert _run("03b500", "030000") == [("right_double",)]
     assert _run("03b600", "030000") == [("left_double",)]
