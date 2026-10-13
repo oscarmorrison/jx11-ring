@@ -26,11 +26,11 @@ Worn on the finger with the **wheel at the bottom**:
 
 | Name | Event(s) |
 |------|----------|
-| **Wheel** | `scroll` (+1 forward / -1 back, one per click) |
-| **Middle** (oval) | `middle`, `middle_double` |
-| **Left** | `left`, `left_double` |
-| **Right** | `right`, `right_double` |
 | **Top** (small circle) | `top` |
+| **Left** | `left`, `left_double` |
+| **Middle** (oval) | `middle`, `middle_double` |
+| **Right** | `right`, `right_double` |
+| **Wheel** | `scroll` (+1 forward / -1 back, one per click) |
 
 The ring's firmware names left and right the other way round (it expects to be
 worn the other way up). This driver uses the names above.
