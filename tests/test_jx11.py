@@ -21,20 +21,20 @@ def test_wheel_y_falling_is_scroll_forward():
     assert _run("0107f4c126", "0107f4e124", "0107f40100", "0102f4611d") == [("scroll", 1)]
 
 
-def test_left_arrow():
-    assert _run("01002c411f", "01022c411f", "01072c911f", "010754411f", "010220431f") == [("left",)]
+def test_swipe_x_rising_is_right_button():
+    assert _run("01002c411f", "01022c411f", "01072c911f", "010754411f", "010220431f") == [("right",)]
 
 
-def test_right_arrow():
-    assert _run("0107bc921f", "010794421f", "0102c8401f") == [("right",)]
+def test_swipe_x_falling_is_left_button():
+    assert _run("0107bc921f", "010794421f", "0102c8401f") == [("left",)]
 
 
-def test_bottom_button_is_still_tap():
-    assert _run("0107f40119", "0100f40119") == [("bottom",)]
+def test_top_button_is_still_tap():
+    assert _run("0107f40119", "0100f40119") == [("top",)]
 
 
-def test_centre_button_is_volume_down_and_release_ignored():
-    assert _run("03ea00", "030000") == [("centre",)]
+def test_middle_button_is_volume_down_and_release_ignored():
+    assert _run("03ea00", "030000") == [("middle",)]
 
 
 def test_pulley_mode_one_scroll_per_click():
@@ -44,19 +44,19 @@ def test_pulley_mode_one_scroll_per_click():
 
 
 def test_pulley_mode_arrows_are_button_report():
-    assert _run("020040", "020000", "020080", "020000") == [("left",), ("right",)]
+    assert _run("020040", "020000", "020080", "020000") == [("right",), ("left",)]
 
 
-def test_bottom_tap_after_pulley_still_fires():
-    assert _run("010fef611d", "0107f40119", "0100f40119") == [("scroll", 1), ("bottom",)]
+def test_top_tap_after_pulley_still_fires():
+    assert _run("010fef611d", "0107f40119", "0100f40119") == [("scroll", 1), ("top",)]
 
 
-def test_centre_alternates_volume_down_and_up():
-    assert _run("03ea00", "030000", "03e900", "030000") == [("centre",), ("centre",)]
+def test_middle_alternates_volume_down_and_up():
+    assert _run("03ea00", "030000", "03e900", "030000") == [("middle",), ("middle",)]
 
 
-def test_centre_double_press_is_ac_home():
-    assert _run("032302", "030000") == [("centre_double",)]
+def test_middle_double_press_is_ac_home():
+    assert _run("032302", "030000") == [("middle_double",)]
 
 
 def test_stop_waits_for_reader_before_closing_device():
@@ -91,5 +91,5 @@ def test_stop_waits_for_reader_before_closing_device():
 
 
 def test_ring_hardware_double_click_is_next_and_previous_track():
-    assert _run("03b500", "030000") == [("right_double",)]
-    assert _run("03b600", "030000") == [("left_double",)]
+    assert _run("03b500", "030000") == [("left_double",)]
+    assert _run("03b600", "030000") == [("right_double",)]

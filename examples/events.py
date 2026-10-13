@@ -9,7 +9,7 @@ from jx11 import Ring
 logging.basicConfig(level=logging.INFO)
 ring = Ring()
 ring.on("scroll", lambda s: print("scroll", s))
-for name in ("centre", "centre_double", "bottom", "left", "right", "left_double", "right_double"):
+for name in ("middle", "middle_double", "top", "left", "right", "left_double", "right_double"):
     ring.on(name, lambda n=name: print(n))
 ring.start()
 while True:

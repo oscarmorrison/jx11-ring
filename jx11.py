@@ -7,30 +7,34 @@ Apple keyboard (VID 0x05AC / PID 0x0220) with a fake touchscreen.
   Report 0x01 — digitizer: [01, flags, x lo, x hi | y lo, y hi]
       flags & 0x01 = finger down, flags & 0x08 = "pulley" (finger held,
       nudged one step per wheel click); x/y are 12-bit packed
-  Report 0x02 — buttons: [02, 00, bitmap]  0x40 = ◀, 0x80 = ▶
+  Report 0x02 — buttons: [02, 00, bitmap]  0x40 = right, 0x80 = left (as worn)
   Report 0x03 — consumer control: [03, usage lo, usage hi]  (0 = release)
 
-Holding ◀ + ▶ for 3 s cycles the ring's modes (blue LED stays on 5 s).
+Names below are as worn: wheel at the bottom; middle oval; small top circle;
+left and right buttons. (The ring's own firmware calls left and right the other
+way round — it expects to be worn the other way up.)
+
+Holding left + right for 3 s cycles the ring's modes (blue LED stays on 5 s).
 Use the "pulley" mode — it's the only one where every button is distinct:
 
   Wheel         → pulley frame per click, Y falling / rising
-  ◀ / ▶         → report 0x02 bits 0x40 / 0x80
-  Centre        → Volume Down (0xEA) / Volume Up (0xE9), alternating
-  Centre ×2     → AC Home (0x0223) — one event, no single-press events
-  Right ×2      → Next Track (0xB5), Left ×2 → Previous Track (0xB6) — the ring's own
+  Left / Right  → report 0x02 bits 0x80 / 0x40
+  Middle        → Volume Down (0xEA) / Volume Up (0xE9), alternating
+  Middle ×2     → AC Home (0x0223) — one event, no single-press events
+  Left ×2       → Next Track (0xB5), Right ×2 → Previous Track (0xB6) — the ring's own
                   double-click: one event, with no single-press events before it
-  Bottom        → tap with no movement
+  Top           → tap with no movement
 
-The swipe mode (wheel = vertical swipe, arrows = horizontal swipes) is also
-understood. In the third mode the wheel sends the same swipes as the
-arrows, so they can't be told apart — switch modes if the wheel "clears".
+The swipe mode (wheel = vertical swipe, left/right = horizontal swipes) is also
+understood. In the third mode the wheel sends the same swipes as left/right, so
+they can't be told apart — switch modes if the wheel deletes words.
 
 The device is opened exclusively (IOHIDDevice seize), so macOS never sees
 these events — no volume changes, no fake clicks.
 
 Events (same .on() shape as Tiller):
   ring.on('scroll', lambda steps: ...)  # +1 forward, -1 back, one per wheel click
-  ring.on('centre' | 'centre_double' | 'bottom' | 'left' | 'right' | 'left_double' | 'right_double', handler)
+  ring.on('middle' | 'middle_double' | 'top' | 'left' | 'right' | 'left_double' | 'right_double', handler)
   ring.on('connect' | 'disconnect', handler)
 """
 
@@ -51,11 +55,11 @@ REPORT_BUTTONS  = 0x02
 REPORT_CONSUMER = 0x03
 USAGE_VOLUME_DOWN = 0x00EA
 USAGE_VOLUME_UP   = 0x00E9
-USAGE_AC_HOME     = 0x0223   # the ring sends this for a centre double-press
-USAGE_NEXT_TRACK  = 0x00B5   # double-click on the button we call 'right' (the ring's own double-click)
-USAGE_PREV_TRACK  = 0x00B6   # double-click on the button we call 'left'
-BUTTON_LEFT  = 0x40
-BUTTON_RIGHT = 0x80
+USAGE_AC_HOME     = 0x0223   # the ring sends this for a middle double-press
+USAGE_NEXT_TRACK  = 0x00B5   # left-button double-click (the ring's own double-click detection)
+USAGE_PREV_TRACK  = 0x00B6   # right-button double-click
+BUTTON_RIGHT = 0x40   # as worn (the firmware calls this one left)
+BUTTON_LEFT  = 0x80
 FLAG_DOWN   = 0x01
 FLAG_PULLEY = 0x08
 # Where the pulley finger rests before the first wheel click.
@@ -88,7 +92,7 @@ def classify_move(start: tuple[int, int], pos: tuple[int, int]) -> tuple | None:
         return None
     if abs(dy) >= abs(dx):
         return ("scroll", 1 if dy < 0 else -1)
-    return ("left",) if dx > 0 else ("right",)
+    return ("right",) if dx > 0 else ("left",)   # worn with the wheel at the bottom
 
 
 class RingGestureParser:
@@ -112,15 +116,15 @@ class RingGestureParser:
             return
         if data[0] == REPORT_CONSUMER and len(data) >= 3:
             usage = data[1] | (data[2] << 8)
-            # The centre button alternates Volume Down / Volume Up on each press.
+            # The middle button alternates Volume Down / Volume Up on each press.
             if usage in (USAGE_VOLUME_DOWN, USAGE_VOLUME_UP):
-                self._emit("centre")
+                self._emit("middle")
             elif usage == USAGE_AC_HOME:
-                self._emit("centre_double")
+                self._emit("middle_double")
             elif usage == USAGE_NEXT_TRACK:
-                self._emit("right_double")
-            elif usage == USAGE_PREV_TRACK:
                 self._emit("left_double")
+            elif usage == USAGE_PREV_TRACK:
+                self._emit("right_double")
             elif usage:
                 log.debug(f"ring: unmapped consumer usage {usage:#06x}")
             return
@@ -162,7 +166,7 @@ class RingGestureParser:
         if self._start is not None:
             log.debug(f"ring touch: {self._start} → {self._last} fired={self._fired}")
             if not self._fired:
-                self._emit("bottom")
+                self._emit("top")
             self.reset()
 
 
